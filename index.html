@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AjudaAki — MVP</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --g: #00C853; --gd: #00A844; --gs: #E8FFF4;
+  --pr: #111827; --ci: #6B7280; --cl: #F3F4F6;
+  --am: #FFB300; --er: #EF4444; --az: #3B82F6;
+  --wh: #ffffff; --br: 16px; --sh: 0 4px 24px rgba(0,0,0,0.09);
+}
+body { font-family:'Inter',sans-serif; background:#F9FAFB; color:var(--pr); }
+h1,h2,h3,h4 { font-family:'Nunito',sans-serif; }
+button { cursor:pointer; font-family:inherit; }
+input,select,textarea { font-family:inherit; }
+a { text-decoration:none; color:inherit; }
+
+/* ─── UTILS ─── */
+.card { background:var(--wh); border-radius:var(--br); box-shadow:var(--sh); padding:28px; }
+.badge { display:inline-flex; align-items:center; gap:5px; font-size:.75rem; font-weight:700; padding:4px 12px; border-radius:50px; }
+.badge-green { background:var(--gs); color:var(--gd); }
+.badge-yellow { background:#FFFBEB; color:#92400E; }
+.badge-red { background:#FEF2F2; color:var(--er); }
+.badge-blue { background:#EFF6FF; color:var(--az); }
+.badge-gray { background:var(--cl); color:var(--ci); }
+.btn { display:inline-flex; align-items:center; gap:7px; padding:11px 22px; border-radius:50px; font-family:'Nunito',sans-serif; font-weight:800; font-size:.9rem; border:none; transition:.15s; cursor:pointer; }
+.btn-primary { background:var(--g); color:#fff; box-shadow:0 4px 14px rgba(0,200,83,.3); }
+.btn-primary:hover { background:var(--gd); transform:translateY(-1px); }
+.btn-secondary { background:var(--cl); color:var(--pr); }
+.btn-secondary:hover { background:#E5E7EB; }
+.btn-danger { background:#FEF2F2; color:var(--er); }
+.btn-danger:hover { background:#FEE2E2; }
+.btn-sm { padding:7px 16px; font-size:.8rem; }
+.btn-ghost { background:transparent; color:var(--ci); }
+.btn-ghost:hover { color:var(--pr); background:var(--cl); }
+.input-wrap { display:flex; flex-direction:column; gap:5px; margin-bottom:16px; }
+.input-wrap label { font-size:.82rem; font-weight:600; color:var(--pr); }
+.input-wrap input, .input-wrap select, .input-wrap textarea {
+  padding:11px 14px; border:2px solid #E5E7EB; border-radius:12px;
+  font-size:.9rem; outline:none; transition:.15s; background:#fff;
+}
+.input-wrap input:focus, .input-wrap select:focus, .input-wrap textarea:focus { border-color:var(--g); }
+.input-wrap .hint { font-size:.75rem; color:var(--ci); }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+.divider { height:1px; background:#F3F4F6; margin:20px 0; }
+.tag { background:var(--gs); color:var(--gd); font-size:.73rem; font-weight:700; padding:3px 10px; border-radius:50px; display:inline-block; }
+.stars { color:var(--am); font-size:.85rem; }
+
+/* ─── TOPBAR ─── */
+.topbar {
+  position:sticky; top:0; z-index:200;
+  background:rgba(255,255,255,.97); backdrop-filter:blur(12px);
+  border-bottom:1px solid #EBEBEB;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 32px; height:62px;
+}
+.logo { font-family:'Nunito',sans-serif; font-weight:900; font-size:1.5rem; letter-spacing:-.5px; cursor:pointer; }
+.logo span { color:var(--g); }
+.topbar-nav { display:flex; align-items:center; gap:6px; }
+.topbar-nav button { background:none; border:none; padding:8px 14px; border-radius:50px; font-size:.85rem; font-weight:600; color:var(--ci); cursor:pointer; transition:.15s; }
+.topbar-nav button:hover { background:var(--cl); color:var(--pr); }
+.topbar-nav button.active { color:var(--g); background:var(--gs); }
+
+/* ─── LANDING ─── */
+.hero-section {
+  background:linear-gradient(135deg,#0A2A1A 0%,#0D3B24 60%,#1B5E35 100%);
+  min-height:88vh; display:flex; align-items:center;
+  padding:60px 5%; position:relative; overflow:hidden;
+}
+.hero-section::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse at 70% 50%, rgba(0,200,83,.18) 0%, transparent 65%);
+}
+.hero-inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1.1fr 1fr; gap:60px; align-items:center; position:relative; z-index:1; width:100%; }
+.hero-pill { display:inline-flex; align-items:center; gap:7px; background:rgba(0,200,83,.15); border:1px solid rgba(0,200,83,.3); color:#6EE7A0; font-size:.78rem; font-weight:700; padding:6px 14px; border-radius:50px; margin-bottom:24px; }
+.hero-pill::before { content:'●'; font-size:.55rem; animation:blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.hero-h1 { font-size:3rem; font-weight:900; line-height:1.1; letter-spacing:-1px; color:#fff; margin-bottom:18px; }
+.hero-h1 em { color:var(--g); font-style:normal; }
+.hero-p { color:rgba(255,255,255,.6); font-size:1rem; line-height:1.75; margin-bottom:36px; max-width:460px; }
+.hero-cta { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:48px; }
+.btn-hero { background:var(--g); color:#fff; padding:15px 30px; border-radius:50px; font-family:'Nunito',sans-serif; font-weight:800; font-size:.95rem; border:none; cursor:pointer; transition:.15s; box-shadow:0 6px 20px rgba(0,200,83,.4); }
+.btn-hero:hover { background:var(--gd); transform:translateY(-2px); }
+.btn-hero-outline { background:transparent; border:2px solid rgba(255,255,255,.3); color:#fff; padding:14px 28px; border-radius:50px; font-family:'Nunito',sans-serif; font-weight:700; font-size:.95rem; cursor:pointer; transition:.15s; }
+.btn-hero-outline:hover { border-color:rgba(255,255,255,.7); }
+.hero-stats { display:flex; gap:28px; }
+.hs { display:flex; flex-direction:column; }
+.hs-num { font-family:'Nunito',sans-serif; font-weight:900; font-size:1.6rem; color:#fff; }
+.hs-lbl { font-size:.75rem; color:rgba(255,255,255,.45); font-weight:500; }
+.hs-div { width:1px; background:rgba(255,255,255,.1); height:36px; align-self:center; }
+
+/* mock phone on hero */
+.hero-phone { display:flex; justify-content:center; }
+.phone-outer { width:240px; background:#0D0D0D; border-radius:40px; padding:12px 10px; box-shadow:0 30px 70px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.07); }
+.phone-inner { background:#F8F9FA; border-radius:30px; overflow:hidden; height:460px; }
+.pnotch { width:80px; height:22px; background:#0D0D0D; border-radius:0 0 16px 16px; margin:0 auto; }
+.pheader { background:var(--g); padding:12px 14px 18px; }
+.pheader-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.plogo { font-family:'Nunito',sans-serif; font-weight:900; font-size:.95rem; color:#fff; }
+.plogo span { color:var(--am); }
+.ploc { font-size:.65rem; color:rgba(255,255,255,.8); font-weight:600; }
+.pgreet { font-family:'Nunito',sans-serif; font-weight:800; color:#fff; font-size:.9rem; margin-bottom:10px; }
+.psearch { background:#fff; border-radius:12px; padding:8px 12px; font-size:.68rem; color:#9CA3AF; display:flex; align-items:center; gap:6px; font-weight:500; }
+.pbody { padding:12px; }
+.psec { font-family:'Nunito',sans-serif; font-weight:800; font-size:.72rem; color:var(--pr); margin-bottom:8px; }
+.pcats { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:12px; }
+.pcat { background:#fff; border-radius:12px; padding:8px 4px; display:flex; flex-direction:column; align-items:center; gap:4px; box-shadow:0 1px 6px rgba(0,0,0,.07); }
+.pcat-ic { font-size:1.1rem; }
+.pcat-lb { font-size:.53rem; font-weight:600; color:var(--ci); text-align:center; }
+.pcard { background:#fff; border-radius:12px; padding:10px; display:flex; align-items:center; gap:8px; box-shadow:0 1px 6px rgba(0,0,0,.06); margin-bottom:6px; }
+.pavatar { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+.pname { font-family:'Nunito',sans-serif; font-weight:800; font-size:.7rem; }
+.prole { font-size:.6rem; color:var(--ci); }
+.pprice { font-family:'Nunito',sans-serif; font-weight:800; font-size:.72rem; color:var(--g); margin-left:auto; }
+.pnavbar { display:flex; border-top:1px solid #F0F0F0; background:#fff; padding:8px 0; }
+.pnav { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:.56rem; color:#9CA3AF; font-weight:600; }
+.pnav.on { color:var(--g); }
+.pnav-ic { font-size:.95rem; }
+
+/* ─── FEATURES ─── */
+.features { padding:80px 5%; max-width:1100px; margin:0 auto; }
+.sec-eyebrow { display:inline-block; background:var(--gs); color:var(--gd); font-size:.75rem; font-weight:700; padding:5px 14px; border-radius:50px; margin-bottom:14px; }
+.sec-h2 { font-size:2rem; font-weight:900; margin-bottom:12px; letter-spacing:-.5px; }
+.sec-p { color:var(--ci); font-size:.95rem; line-height:1.7; max-width:500px; margin-bottom:48px; }
+.feat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.feat-card { background:var(--wh); border-radius:var(--br); padding:28px; border:1px solid #F0F0F0; transition:.2s; }
+.feat-card:hover { transform:translateY(-4px); box-shadow:var(--sh); border-color:var(--gs); }
+.feat-ic { font-size:2rem; margin-bottom:14px; }
+.feat-title { font-family:'Nunito',sans-serif; font-weight:800; font-size:1rem; margin-bottom:8px; }
+.feat-desc { font-size:.87rem; color:var(--ci); line-height:1.6; }
+
+/* ─── COMO FUNCIONA ─── */
+.how { background:var(--pr); padding:80px 5%; }
+.how-inner { max-width:1100px; margin:0 auto; }
+.how h2 { color:#fff; }
+.how .sec-p { color:rgba(255,255,255,.5); }
+.how .sec-eyebrow { background:rgba(0,200,83,.15); }
+.steps { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.step { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:var(--br); padding:28px; }
+.step.hl { background:var(--g); border-color:var(--g); }
+.step-n { font-family:'Nunito',sans-serif; font-weight:900; font-size:2.8rem; color:rgba(255,255,255,.1); line-height:1; margin-bottom:12px; }
+.step.hl .step-n { color:rgba(255,255,255,.2); }
+.step-ic { font-size:1.8rem; margin-bottom:10px; }
+.step-t { font-family:'Nunito',sans-serif; font-weight:800; font-size:1rem; color:#fff; margin-bottom:8px; }
+.step-d { font-size:.85rem; color:rgba(255,255,255,.5); line-height:1.6; }
+.step.hl .step-d { color:rgba(255,255,255,.8); }
+
+/* ─── CATS ─── */
+.cats { padding:80px 5%; background:var(--cl); }
+.cats-inner { max-width:1100px; margin:0 auto; }
+.cats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+.cat-card { background:#fff; border-radius:var(--br); padding:24px 18px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; border:1px solid #EBEBEB; transition:.2s; cursor:pointer; }
+.cat-card:hover { border-color:var(--g); transform:translateY(-3px); box-shadow:var(--sh); }
+.cat-ic { font-size:2rem; }
+.cat-nm { font-family:'Nunito',sans-serif; font-weight:800; font-size:.95rem; }
+.cat-ct { font-size:.78rem; color:var(--ci); }
+
+/* ─── PRO SECTION ─── */
+.pro-pitch { padding:80px 5%; background:linear-gradient(135deg,#F0FFF4,#E8FFF0); }
+.pro-pitch-inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; }
+.split-card { background:#fff; border-radius:var(--br); padding:28px; box-shadow:var(--sh); }
+.split-label { font-size:.8rem; font-weight:600; color:var(--ci); margin-bottom:4px; }
+.split-big { font-family:'Nunito',sans-serif; font-weight:900; font-size:2.8rem; color:var(--g); letter-spacing:-2px; line-height:1; margin-bottom:4px; }
+.split-sub { font-size:.8rem; color:var(--ci); margin-bottom:20px; }
+.bar-row { margin-bottom:14px; }
+.bar-labels { display:flex; justify-content:space-between; font-size:.78rem; font-weight:600; margin-bottom:5px; }
+.bar-track { height:8px; background:var(--cl); border-radius:50px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:50px; }
+.earning-rows div { display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid #F3F4F6; font-size:.85rem; }
+.earning-rows div:last-child { border:none; }
+.pro-bens li { display:flex; gap:10px; padding:12px 0; border-bottom:1px solid #E5E7EB; font-size:.9rem; align-items:flex-start; }
+.pro-bens li:last-child { border:none; }
+.pro-bens { list-style:none; }
+.chk { width:22px; height:22px; background:var(--g); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:.7rem; flex-shrink:0; margin-top:2px; }
+
+/* ─── TELAS INTERNAS ─── */
+.page { min-height:100vh; }
+.page-header { background:#fff; border-bottom:1px solid #EBEBEB; padding:20px 32px; display:flex; align-items:center; justify-content:space-between; }
+.page-title { font-family:'Nunito',sans-serif; font-weight:900; font-size:1.3rem; }
+.page-body { max-width:1100px; margin:0 auto; padding:32px; }
+
+/* ─── BUSCA ─── */
+.search-hero { background:var(--g); padding:36px 32px; color:#fff; }
+.search-hero-inner { max-width:1100px; margin:0 auto; }
+.search-hero h2 { font-family:'Nunito',sans-serif; font-weight:900; font-size:1.6rem; color:#fff; margin-bottom:16px; }
+.search-bar { display:flex; gap:10px; }
+.search-input { flex:1; padding:13px 18px; border-radius:12px; border:none; font-size:.9rem; outline:none; }
+.search-input::placeholder { color:#9CA3AF; }
+.cat-filter { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
+.cf { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); color:#fff; padding:6px 14px; border-radius:50px; font-size:.78rem; font-weight:700; cursor:pointer; transition:.15s; border-style:solid; }
+.cf:hover,.cf.on { background:rgba(255,255,255,.3); border-color:rgba(255,255,255,.6); }
+
+.results-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.pro-result-card { background:#fff; border-radius:var(--br); overflow:hidden; border:1px solid #EBEBEB; transition:.2s; cursor:pointer; }
+.pro-result-card:hover { transform:translateY(-4px); box-shadow:var(--sh); border-color:var(--g); }
+.prc-head { padding:20px; display:flex; gap:14px; align-items:flex-start; }
+.prc-avatar { width:54px; height:54px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0; }
+.prc-name { font-family:'Nunito',sans-serif; font-weight:800; font-size:1rem; margin-bottom:2px; }
+.prc-role { font-size:.8rem; color:var(--ci); margin-bottom:6px; }
+.prc-meta { display:flex; gap:10px; flex-wrap:wrap; }
+.prc-body { padding:0 20px 16px; }
+.prc-desc { font-size:.83rem; color:var(--ci); line-height:1.5; margin-bottom:12px; }
+.prc-footer { padding:14px 20px; border-top:1px solid #F3F4F6; display:flex; justify-content:space-between; align-items:center; }
+.prc-price { font-family:'Nunito',sans-serif; font-weight:900; font-size:1.1rem; color:var(--g); }
+.prc-price span { font-size:.75rem; color:var(--ci); font-weight:500; }
+
+/* ─── MODAL CONTRATAR ─── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(4px); }
+.modal { background:#fff; border-radius:20px; width:100%; max-width:540px; max-height:90vh; overflow-y:auto; }
+.modal-header { padding:24px 24px 0; display:flex; justify-content:space-between; align-items:center; }
+.modal-title { font-family:'Nunito',sans-serif; font-weight:900; font-size:1.2rem; }
+.modal-close { background:var(--cl); border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; }
+.modal-body { padding:24px; }
+.modal-footer { padding:0 24px 24px; display:flex; gap:10px; justify-content:flex-end; }
+.checkout-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #F3F4F6; font-size:.9rem; }
+.checkout-row:last-child { border:none; font-weight:700; font-size:1rem; }
+.checkout-row .val-green { color:var(--g); font-weight:700; }
+
+/* ─── CADASTRO PRO ─── */
+.register-wrap { max-width:680px; margin:0 auto; padding:40px 32px; }
+.register-steps { display:flex; gap:0; margin-bottom:36px; }
+.reg-step { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.reg-step-dot { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Nunito',sans-serif; font-weight:800; font-size:.85rem; border:2px solid #E5E7EB; color:var(--ci); background:#fff; transition:.2s; }
+.reg-step.done .reg-step-dot { background:var(--g); border-color:var(--g); color:#fff; }
+.reg-step.active .reg-step-dot { border-color:var(--g); color:var(--g); }
+.reg-step-lbl { font-size:.72rem; font-weight:600; color:var(--ci); text-align:center; }
+.reg-step.active .reg-step-lbl, .reg-step.done .reg-step-lbl { color:var(--pr); }
+.reg-connector { flex:1; height:2px; background:#E5E7EB; margin-top:15px; }
+.reg-connector.done { background:var(--g); }
+.reg-card { background:#fff; border-radius:var(--br); padding:32px; box-shadow:var(--sh); }
+.reg-title { font-family:'Nunito',sans-serif; font-weight:900; font-size:1.2rem; margin-bottom:6px; }
+.reg-sub { font-size:.85rem; color:var(--ci); margin-bottom:24px; }
+.cats-check { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+.cat-check-item { border:2px solid #E5E7EB; border-radius:12px; padding:12px 10px; display:flex; flex-direction:column; align-items:center; gap:5px; cursor:pointer; transition:.15s; }
+.cat-check-item.sel { border-color:var(--g); background:var(--gs); }
+.cat-check-item .ic { font-size:1.5rem; }
+.cat-check-item .lb { font-size:.72rem; font-weight:700; text-align:center; color:var(--ci); }
+.cat-check-item.sel .lb { color:var(--gd); }
+.success-screen { text-align:center; padding:40px 20px; }
+.success-icon { font-size:4rem; margin-bottom:16px; }
+.success-title { font-family:'Nunito',sans-serif; font-weight:900; font-size:1.5rem; margin-bottom:10px; }
+.success-sub { color:var(--ci); font-size:.9rem; line-height:1.6; margin-bottom:24px; }
+
+/* ─── ADMIN ─── */
+.admin-layout { display:grid; grid-template-columns:220px 1fr; min-height:100vh; }
+.admin-sidebar { background:var(--pr); padding:24px 0; position:sticky; top:0; height:100vh; }
+.admin-logo { font-family:'Nunito',sans-serif; font-weight:900; font-size:1.3rem; color:#fff; padding:0 20px 24px; }
+.admin-logo span { color:var(--g); }
+.admin-nav { display:flex; flex-direction:column; gap:2px; padding:0 12px; }
+.anav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; color:rgba(255,255,255,.55); font-size:.85rem; font-weight:600; cursor:pointer; transition:.15s; }
+.anav-item:hover { background:rgba(255,255,255,.06); color:#fff; }
+.anav-item.active { background:var(--g); color:#fff; }
+.anav-ic { font-size:1.1rem; }
+.admin-main { background:#F3F4F6; }
+.admin-topbar { background:#fff; border-bottom:1px solid #EBEBEB; padding:0 28px; height:58px; display:flex; align-items:center; justify-content:space-between; }
+.admin-topbar-title { font-family:'Nunito',sans-serif; font-weight:800; font-size:1rem; }
+.admin-body { padding:28px; }
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+.stat-card { background:#fff; border-radius:var(--br); padding:22px; box-shadow:0 1px 8px rgba(0,0,0,.06); }
+.stat-card-lbl { font-size:.78rem; font-weight:600; color:var(--ci); margin-bottom:8px; }
+.stat-card-val { font-family:'Nunito',sans-serif; font-weight:900; font-size:1.8rem; color:var(--pr); margin-bottom:4px; }
+.stat-card-sub { font-size:.73rem; color:var(--ci); }
+.stat-card-sub.up { color:#10B981; }
+.table-wrap { background:#fff; border-radius:var(--br); box-shadow:0 1px 8px rgba(0,0,0,.06); overflow:hidden; }
+.table-header { padding:18px 22px; border-bottom:1px solid #F3F4F6; display:flex; justify-content:space-between; align-items:center; }
+.table-title { font-family:'Nunito',sans-serif; font-weight:800; font-size:.95rem; }
+table { width:100%; border-collapse:collapse; }
+th { padding:11px 22px; text-align:left; font-size:.75rem; font-weight:700; color:var(--ci); border-bottom:1px solid #F3F4F6; background:#FAFAFA; text-transform:uppercase; letter-spacing:.4px; }
+td { padding:14px 22px; font-size:.85rem; border-bottom:1px solid #F8F8F8; }
+tr:last-child td { border:none; }
+tr:hover td { background:#FAFAFA; }
+.td-name { font-weight:600; color:var(--pr); }
+.td-email { color:var(--ci); font-size:.8rem; }
+.action-btns { display:flex; gap:8px; }
+
+/* ─── TOAST ─── */
+.toast { position:fixed; bottom:28px; right:28px; background:var(--pr); color:#fff; padding:14px 20px; border-radius:14px; font-size:.88rem; font-weight:600; z-index:9999; display:flex; align-items:center; gap:10px; box-shadow:0 8px 30px rgba(0,0,0,.25); animation:slideup .3s ease; }
+@keyframes slideup { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+.toast.success { border-left:4px solid var(--g); }
+.toast.error { border-left:4px solid var(--er); }
+
+/* ─── TABS ─── */
+.tabs { display:flex; gap:4px; background:var(--cl); border-radius:12px; padding:4px; margin-bottom:24px; }
+.tab { flex:1; padding:9px; border-radius:8px; border:none; background:none; font-family:'Nunito',sans-serif; font-weight:700; font-size:.85rem; color:var(--ci); cursor:pointer; transition:.15s; }
+.tab.active { background:#fff; color:var(--pr); box-shadow:0 1px 4px rgba(0,0,0,.08); }
+
+@media(max-width:900px) {
+  .hero-inner,.pro-pitch-inner { grid-template-columns:1fr; }
+  .hero-phone { display:none; }
+  .feat-grid,.steps,.cats-grid,.results-grid { grid-template-columns:1fr 1fr; }
+  .admin-layout { grid-template-columns:1fr; }
+  .admin-sidebar { display:none; }
+  .stats-row { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+// ─── DADOS MOCK ───
+const CATS = [
+  {id:'faxina',nm:'Faxina',ic:'🧹'},
+  {id:'eletrica',nm:'Elétrica',ic:'⚡'},
+  {id:'reparos',nm:'Reparos',ic:'🔧'},
+  {id:'beleza',nm:'Beleza',ic:'💇'},
+  {id:'encanamento',nm:'Encanamento',ic:'🪠'},
+  {id:'pintura',nm:'Pintura',ic:'🎨'},
+  {id:'petcare',nm:'Pet Care',ic:'🐾'},
+  {id:'mudanca',nm:'Mudança',ic:'📦'},
+];
+
+const INIT_PROS = [
+  {id:1,nm:'Marina Santos',role:'Faxina & Limpeza',cat:'faxina',email:'marina@email.com',cnpj:'12.345.678/0001-90',cidade:'São Paulo, SP',desc:'10 anos de experiência. Produtos inclusos. Atendo residências e comerciais.',preco:120,avaliacao:4.9,reviews:87,dist:'1.2km',status:'pendente',ic:'🧹',bg:'#FEF3C7'},
+  {id:2,nm:'Carlos Melo',role:'Eletricista',cat:'eletrica',email:'carlos@email.com',cnpj:'98.765.432/0001-10',cidade:'São Paulo, SP',desc:'CREA registrado. Instalações, manutenções, quadros elétricos e emergências.',preco:150,avaliacao:4.7,reviews:142,dist:'2.5km',status:'aprovado',ic:'⚡',bg:'#DCFCE7'},
+  {id:3,nm:'Luiza Ferreira',role:'Cabeleireira & Estética',cat:'beleza',email:'luiza@email.com',cnpj:'11.222.333/0001-44',cidade:'São Paulo, SP',desc:'Cortes, colorações, sobrancelha e depilação. Atendo em domicílio.',preco:90,avaliacao:4.8,reviews:203,dist:'0.8km',status:'aprovado',ic:'💇',bg:'#EDE9FE'},
+  {id:4,nm:'Roberto Alves',role:'Encanador',cat:'encanamento',email:'roberto@email.com',cnpj:'55.666.777/0001-22',cidade:'São Paulo, SP',desc:'Reparos em vazamentos, instalação de torneiras, banheiros e pias.',preco:130,avaliacao:4.6,reviews:64,dist:'3.1km',status:'aprovado',ic:'🪠',bg:'#DBEAFE'},
+  {id:5,nm:'Pedro Costa',role:'Pintor Residencial',cat:'pintura',email:'pedro@email.com',cnpj:'33.444.555/0001-88',cidade:'São Paulo, SP',desc:'Pintura interna e externa. Orçamento grátis. Experiência em condomínios.',preco:200,avaliacao:4.5,reviews:38,dist:'4.2km',status:'pendente',ic:'🎨',bg:'#FEE2E2'},
+  {id:6,nm:'Ana Lima',role:'Dog Walker & Pet Sitter',cat:'petcare',email:'ana@email.com',cnpj:'77.888.999/0001-66',cidade:'São Paulo, SP',desc:'Passeios diários, banho e tosa, hospedagem. Amo animais!',preco:60,avaliacao:5.0,reviews:156,dist:'1.8km',status:'aprovado',ic:'🐾',bg:'#F0FFF4'},
+];
+
+const INIT_PEDIDOS = [
+  {id:'PED-001',cliente:'João Silva',pro:'Carlos Melo',servico:'Elétrica',valor:300,comissao:60,status:'concluido',data:'12/06/2025'},
+  {id:'PED-002',cliente:'Maria Souza',pro:'Marina Santos',servico:'Faxina',valor:120,comissao:24,status:'em_andamento',data:'14/06/2025'},
+  {id:'PED-003',cliente:'Felipe Dias',pro:'Luiza Ferreira',servico:'Beleza',valor:90,comissao:18,status:'agendado',data:'15/06/2025'},
+  {id:'PED-004',cliente:'Carla Mendes',pro:'Roberto Alves',servico:'Encanamento',valor:260,comissao:52,status:'concluido',data:'10/06/2025'},
+  {id:'PED-005',cliente:'Bruno Neves',pro:'Ana Lima',servico:'Pet Care',valor:180,comissao:36,status:'concluido',data:'09/06/2025'},
+];
+
+// ─── COMPONENTES ───
+function Toast({msg,type,onDone}) {
+  useEffect(() => { const t = setTimeout(onDone, 3000); return()=>clearTimeout(t); },[]);
+  return <div className={`toast ${type}`}>{type==='success'?'✅':'❌'} {msg}</div>;
+}
+
+function Topbar({page, setPage}) {
+  return (
+    <div className="topbar">
+      <div className="logo" onClick={()=>setPage('landing')}>Ajuda<span>Aki</span></div>
+      <div className="topbar-nav">
+        <button className={page==='buscar'?'active':''} onClick={()=>setPage('buscar')}>🔍 Buscar serviços</button>
+        <button className={page==='cadastro'?'active':''} onClick={()=>setPage('cadastro')}>💼 Sou profissional</button>
+        <button className={page==='admin'?'active':''} onClick={()=>setPage('admin')}>⚙️ Admin</button>
+        <button className="btn btn-primary btn-sm" onClick={()=>setPage('buscar')}>Começar agora</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── LANDING ───
+function Landing({setPage}) {
+  return (
+    <div>
+      {/* HERO */}
+      <div className="hero-section">
+        <div className="hero-inner">
+          <div>
+            <div className="hero-pill">🚀 Disponível em todo o Brasil</div>
+            <h1 className="hero-h1">O profissional certo,<br/><em>do lado de casa</em></h1>
+            <p className="hero-p">Faxina, elétrica, beleza, reparos e muito mais. Profissionais verificados com MEI, pagamento seguro e avaliações reais.</p>
+            <div className="hero-cta">
+              <button className="btn-hero" onClick={()=>setPage('buscar')}>🔍 Encontrar profissional</button>
+              <button className="btn-hero-outline" onClick={()=>setPage('cadastro')}>Sou profissional →</button>
+            </div>
+            <div className="hero-stats">
+              <div className="hs"><span className="hs-num">18k+</span><span className="hs-lbl">Profissionais</span></div>
+              <div className="hs-div"/>
+              <div className="hs"><span className="hs-num">94k+</span><span className="hs-lbl">Serviços feitos</span></div>
+              <div className="hs-div"/>
+              <div className="hs"><span className="hs-num">4.8★</span><span className="hs-lbl">Avaliação média</span></div>
+            </div>
+          </div>
+          <div className="hero-phone">
+            <div className="phone-outer">
+              <div className="phone-inner">
+                <div className="pnotch"/>
+                <div className="pheader">
+                  <div className="pheader-row">
+                    <div className="ploc">📍 São Paulo, SP</div>
+                    <div className="plogo">Ajuda<span>Aki</span></div>
+                  </div>
+                  <div className="pgreet">Olá, João! 👋<br/>O que precisa hoje?</div>
+                  <div className="psearch">🔍 Buscar serviço...</div>
+                </div>
+                <div className="pbody">
+                  <div className="psec">Categorias</div>
+                  <div className="pcats">
+                    {CATS.slice(0,4).map(c=><div key={c.id} className="pcat"><span className="pcat-ic">{c.ic}</span><span className="pcat-lb">{c.nm}</span></div>)}
+                  </div>
+                  <div className="psec">Perto de você</div>
+                  {INIT_PROS.slice(0,2).map(p=>(
+                    <div key={p.id} className="pcard">
+                      <div className="pavatar" style={{background:p.bg}}>{p.ic}</div>
+                      <div style={{flex:1}}>
+                        <div className="pname">{p.nm}</div>
+                        <div className="prole">{p.role} · {p.dist}</div>
+                      </div>
+                      <div className="pprice">R${p.preco}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="pnavbar">
+                  {['🏠 Início','🔍 Buscar','📋 Pedidos','👤 Perfil'].map((n,i)=>(
+                    <div key={i} className={`pnav${i===0?' on':''}`}>
+                      <span className="pnav-ic">{n.split(' ')[0]}</span>
+                      <span>{n.split(' ')[1]}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* FEATURES */}
+      <div className="features">
+        <div className="sec-eyebrow">✨ Por que o AjudaAki</div>
+        <h2 className="sec-h2">Simples para quem contrata,<br/>justo para quem trabalha</h2>
+        <p className="sec-p">Uma plataforma pensada para facilitar a vida de todos — clientes e profissionais.</p>
+        <div className="feat-grid">
+          {[
+            {ic:'🔒',t:'Profissionais verificados',d:'Todos os profissionais passam por verificação de CNPJ MEI e aprovação manual antes de aparecer na plataforma.'},
+            {ic:'💳',t:'Pagamento seguro',d:'Integração com Pagar.me. O dinheiro fica em custódia até a confirmação do serviço pelo cliente.'},
+            {ic:'⭐',t:'Avaliações reais',d:'Só quem contratou pode avaliar. Histórico transparente de cada profissional com notas e comentários.'},
+            {ic:'📍',t:'Profissionais próximos',d:'Veja quem está disponível perto de você agora. Distância em tempo real e agenda do profissional.'},
+            {ic:'🤝',t:'80% para o profissional',d:'O maior repasse do mercado. Trabalhamos para que os profissionais ganhem mais e atendam melhor.'},
+            {ic:'📱',t:'Tudo na web',d:'Sem precisar de app. Funciona no celular, tablet ou computador — para clientes e profissionais.'},
+          ].map((f,i)=>(
+            <div key={i} className="feat-card">
+              <div className="feat-ic">{f.ic}</div>
+              <div className="feat-title">{f.t}</div>
+              <p className="feat-desc">{f.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* COMO FUNCIONA */}
+      <div className="how">
+        <div className="how-inner">
+          <div className="sec-eyebrow">📋 Passo a passo</div>
+          <h2 className="sec-h2" style={{color:'#fff'}}>Como funciona</h2>
+          <p className="sec-p">Três passos para contratar. Três passos para trabalhar.</p>
+          <div className="steps">
+            {[
+              {n:'01',ic:'🔍',t:'Busque',d:'Escolha a categoria e veja profissionais verificados perto de você com preços transparentes.'},
+              {n:'02',ic:'✅',t:'Agende e pague',d:'Escolha o profissional, agende o horário e pague com segurança direto na plataforma.',hl:true},
+              {n:'03',ic:'⭐',t:'Confirme e avalie',d:'Após o serviço, confirme a conclusão. O pagamento é liberado e você avalia o profissional.'},
+            ].map((s,i)=>(
+              <div key={i} className={`step${s.hl?' hl':''}`}>
+                <div className="step-n">{s.n}</div>
+                <div className="step-ic">{s.ic}</div>
+                <div className="step-t">{s.t}</div>
+                <p className="step-d">{s.d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* CATEGORIAS */}
+      <div className="cats">
+        <div className="cats-inner">
+          <div className="sec-eyebrow">📂 Categorias</div>
+          <h2 className="sec-h2">Qualquer serviço que precisar</h2>
+          <p className="sec-p" style={{marginBottom:36}}>De reparos urgentes a cuidados do dia a dia.</p>
+          <div className="cats-grid">
+            {[
+              {ic:'🧹',nm:'Faxina & Limpeza',ct:'2.4k pros'},
+              {ic:'⚡',nm:'Eletricista',ct:'1.1k pros'},
+              {ic:'🔧',nm:'Reparos gerais',ct:'980 pros'},
+              {ic:'💇',nm:'Beleza & Estética',ct:'3.2k pros'},
+              {ic:'🪠',nm:'Encanamento',ct:'750 pros'},
+              {ic:'🎨',nm:'Pintura',ct:'1.3k pros'},
+              {ic:'🐾',nm:'Pet Care',ct:'860 pros'},
+              {ic:'📦',nm:'Mudança & Fretes',ct:'620 pros'},
+            ].map((c,i)=>(
+              <div key={i} className="cat-card" onClick={()=>setPage('buscar')}>
+                <span className="cat-ic">{c.ic}</span>
+                <div className="cat-nm">{c.nm}</div>
+                <div className="cat-ct">{c.ct}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* PARA PROFISSIONAIS */}
+      <div className="pro-pitch">
+        <div className="pro-pitch-inner">
+          <div>
+            <div className="sec-eyebrow">💼 Para profissionais</div>
+            <h2 className="sec-h2">Ganhe mais, no seu ritmo</h2>
+            <p className="sec-p">Cadastre seu MEI e receba 80% de tudo que faturar. Agenda e preços no seu controle.</p>
+            <ul className="pro-bens">
+              {[
+                ['Cadastro com CNPJ MEI','Transparência e segurança jurídica para você e para o cliente.'],
+                ['80% de comissão','O maior repasse do mercado. Você faz o trabalho, você leva o troco.'],
+                ['Pagamento em até 2 dias úteis','Sem enrolação. Pix ou transferência bancária.'],
+                ['Agenda no seu controle','Aceite ou recuse pedidos conforme sua disponibilidade.'],
+                ['Perfil verificado e destaque','Mais visibilidade e confiança para receber mais clientes.'],
+              ].map(([t,d],i)=>(
+                <li key={i}><div className="chk">✓</div><div><strong>{t}</strong> — {d}</div></li>
+              ))}
+            </ul>
+            <div style={{marginTop:28}}>
+              <button className="btn btn-primary" onClick={()=>setPage('cadastro')}>Quero me cadastrar →</button>
+            </div>
+          </div>
+          <div className="split-card">
+            <div className="split-label">Simulação de ganhos mensais</div>
+            <div className="split-big">R$3.200</div>
+            <div className="split-sub">Faxineira · 20 serviços × R$200</div>
+            <div className="bar-row">
+              <div className="bar-labels"><span style={{color:'var(--g)'}}>Você recebe — 80%</span><span style={{color:'var(--g)'}}>R$3.200</span></div>
+              <div className="bar-track"><div className="bar-fill" style={{width:'80%',background:'var(--g)'}}/></div>
+            </div>
+            <div className="bar-row">
+              <div className="bar-labels"><span style={{color:'#9CA3AF'}}>Taxa AjudaAki — 20%</span><span style={{color:'#9CA3AF'}}>R$800</span></div>
+              <div className="bar-track"><div className="bar-fill" style={{width:'20%',background:'#E5E7EB'}}/></div>
+            </div>
+            <div className="earning-rows">
+              <div><span style={{color:'var(--ci)'}}>Faturamento bruto</span><span style={{fontWeight:600}}>R$4.000</span></div>
+              <div><span style={{color:'var(--ci)'}}>Taxa da plataforma (20%)</span><span style={{color:'#9CA3AF'}}>−R$800</span></div>
+              <div><span style={{fontWeight:700}}>Você recebe</span><span style={{color:'var(--g)',fontWeight:900,fontSize:'1.1rem'}}>R$3.200 💚</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA FINAL */}
+      <div style={{background:'var(--g)',padding:'72px 5%',textAlign:'center'}}>
+        <h2 style={{color:'#fff',fontSize:'2rem',marginBottom:12}}>Pronto para começar?</h2>
+        <p style={{color:'rgba(255,255,255,.8)',marginBottom:32,fontSize:'1rem'}}>Encontre ou ofereça serviços perto de você agora mesmo.</p>
+        <div style={{display:'flex',gap:14,justifyContent:'center',flexWrap:'wrap'}}>
+          <button style={{background:'#fff',color:'var(--g)',padding:'15px 32px',borderRadius:'50px',fontFamily:'Nunito,sans-serif',fontWeight:800,fontSize:'1rem',border:'none',cursor:'pointer'}} onClick={()=>setPage('buscar')}>Contratar profissional</button>
+          <button style={{background:'transparent',border:'2px solid rgba(255,255,255,.5)',color:'#fff',padding:'14px 30px',borderRadius:'50px',fontFamily:'Nunito,sans-serif',fontWeight:700,fontSize:'1rem',cursor:'pointer'}} onClick={()=>setPage('cadastro')}>Cadastrar como profissional</button>
+        </div>
+      </div>
+
+      {/* FOOTER */}
+      <div style={{background:'#0D1117',padding:'44px 5% 24px'}}>
+        <div style={{maxWidth:1100,margin:'0 auto'}}>
+          <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr 1fr',gap:40,marginBottom:36}}>
+            <div>
+              <div className="logo" style={{color:'#fff',marginBottom:10}}>Ajuda<span>Aki</span></div>
+              <p style={{fontSize:'.83rem',color:'rgba(255,255,255,.4)',lineHeight:1.7}}>Conectando pessoas a profissionais de confiança em todo o Brasil.</p>
+            </div>
+            {[['Clientes',['Como funciona','Categorias','Segurança','Garantia']],
+              ['Profissionais',['Cadastre-se','Comissões','Suporte','FAQ']],
+              ['Empresa',['Sobre nós','Termos','Privacidade','Contato']]
+            ].map(([title,links])=>(
+              <div key={title}>
+                <div style={{fontFamily:'Nunito,sans-serif',fontWeight:800,color:'#fff',fontSize:'.85rem',marginBottom:14}}>{title}</div>
+                {links.map(l=><div key={l} style={{fontSize:'.82rem',color:'rgba(255,255,255,.4)',marginBottom:9,cursor:'pointer'}}>{l}</div>)}
+              </div>
+            ))}
+          </div>
+          <div style={{borderTop:'1px solid rgba(255,255,255,.07)',paddingTop:20,display:'flex',justifyContent:'space-between',alignItems:'center',fontSize:'.78rem',color:'rgba(255,255,255,.3)'}}>
+            <span>© 2025 AjudaAki. Todos os direitos reservados.</span>
+            <span style={{background:'rgba(0,200,83,.12)',color:'var(--g)',fontSize:'.72rem',fontWeight:700,padding:'3px 12px',borderRadius:'50px'}}>Plataforma para MEIs registrados</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── BUSCA ───
+function Buscar({pros,showToast}) {
+  const [query,setQuery] = useState('');
+  const [catFilter,setCatFilter] = useState('todos');
+  const [modal,setModal] = useState(null);
+  const [step,setStep] = useState(1); // 1=detalhes 2=pagamento 3=confirmado
+  const [form,setForm] = useState({data:'',hora:'',obs:'',pagamento:'pix'});
+
+  const aprovados = pros.filter(p=>p.status==='aprovado');
+  const filtered = aprovados.filter(p=>{
+    const matchQ = !query || p.nm.toLowerCase().includes(query.toLowerCase()) || p.role.toLowerCase().includes(query.toLowerCase());
+    const matchC = catFilter==='todos' || p.cat===catFilter;
+    return matchQ && matchC;
+  });
+
+  function handleContratar() {
+    if(!form.data||!form.hora){showToast('Preencha data e horário','error');return;}
+    setStep(3);
+  }
+
+  return (
+    <div className="page">
+      <div className="search-hero">
+        <div className="search-hero-inner">
+          <h2>Encontre o profissional certo 📍</h2>
+          <div className="search-bar">
+            <input className="search-input" placeholder="Buscar por serviço ou nome do profissional..." value={query} onChange={e=>setQuery(e.target.value)}/>
+            <button className="btn btn-primary">Buscar</button>
+          </div>
+          <div className="cat-filter">
+            <button className={`cf${catFilter==='todos'?' on':''}`} onClick={()=>setCatFilter('todos')}>Todos</button>
+            {CATS.map(c=><button key={c.id} className={`cf${catFilter===c.id?' on':''}`} onClick={()=>setCatFilter(c.id)}>{c.ic} {c.nm}</button>)}
+          </div>
+        </div>
+      </div>
+      <div className="page-body">
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+          <p style={{color:'var(--ci)',fontSize:'.9rem'}}><strong>{filtered.length}</strong> profissional(is) disponível(is)</p>
+        </div>
+        {filtered.length===0 && (
+          <div style={{textAlign:'center',padding:'60px 20px',color:'var(--ci)'}}>
+            <div style={{fontSize:'3rem',marginBottom:12}}>🔍</div>
+            <div style={{fontFamily:'Nunito',fontWeight:800,fontSize:'1.1rem',marginBottom:8,color:'var(--pr)'}}>Nenhum profissional encontrado</div>
+            <p style={{fontSize:'.9rem'}}>Tente outro termo ou categoria.</p>
+          </div>
+        )}
+        <div className="results-grid">
+          {filtered.map(p=>(
+            <div key={p.id} className="pro-result-card">
+              <div className="prc-head">
+                <div className="prc-avatar" style={{background:p.bg}}>{p.ic}</div>
+                <div style={{flex:1}}>
+                  <div className="prc-name">{p.nm}</div>
+                  <div className="prc-role">{p.role}</div>
+                  <div className="prc-meta">
+                    <span className="stars">{'★'.repeat(Math.floor(p.avaliacao))}</span>
+                    <span style={{fontSize:'.78rem',fontWeight:700}}>{p.avaliacao}</span>
+                    <span style={{fontSize:'.75rem',color:'var(--ci)'}}>({p.reviews} avaliações)</span>
+                  </div>
+                </div>
+              </div>
+              <div className="prc-body">
+                <p className="prc-desc">{p.desc}</p>
+                <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                  <span className="badge badge-green">✓ MEI Verificado</span>
+                  <span className="badge badge-gray">📍 {p.dist}</span>
+                  <span className="badge badge-blue">🏙️ {p.cidade}</span>
+                </div>
+              </div>
+              <div className="prc-footer">
+                <div className="prc-price">R${p.preco}<span>/{p.cat==='eletrica'?'hora':'serviço'}</span></div>
+                <button className="btn btn-primary btn-sm" onClick={()=>{setModal(p);setStep(1);setForm({data:'',hora:'',obs:'',pagamento:'pix'});}}>Contratar</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {modal && (
+        <div className="modal-overlay" onClick={e=>{if(e.target.className==='modal-overlay')setModal(null);}}>
+          <div className="modal">
+            <div className="modal-header">
+              <div className="modal-title">
+                {step===1&&`Agendar com ${modal.nm}`}
+                {step===2&&'Confirmar e pagar'}
+                {step===3&&'Pedido confirmado! 🎉'}
+              </div>
+              <button className="modal-close" onClick={()=>setModal(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              {step===1 && (
+                <>
+                  <div style={{display:'flex',gap:14,alignItems:'center',padding:'12px 0',marginBottom:16,borderBottom:'1px solid #F3F4F6'}}>
+                    <div style={{width:48,height:48,borderRadius:14,background:modal.bg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.5rem'}}>{modal.ic}</div>
+                    <div>
+                      <div style={{fontFamily:'Nunito',fontWeight:800}}>{modal.nm}</div>
+                      <div style={{fontSize:'.82rem',color:'var(--ci)'}}>{modal.role} · {modal.avaliacao}★ · {modal.reviews} avaliações</div>
+                    </div>
+                  </div>
+                  <div className="grid-2">
+                    <div className="input-wrap">
+                      <label>Data do serviço</label>
+                      <input type="date" value={form.data} onChange={e=>setForm({...form,data:e.target.value})}/>
+                    </div>
+                    <div className="input-wrap">
+                      <label>Horário</label>
+                      <input type="time" value={form.hora} onChange={e=>setForm({...form,hora:e.target.value})}/>
+                    </div>
+                  </div>
+                  <div className="input-wrap">
+                    <label>Observações (opcional)</label>
+                    <textarea rows={3} placeholder="Ex: apartamento com 2 quartos, levar produtos..." value={form.obs} onChange={e=>setForm({...form,obs:e.target.value})} style={{resize:'none'}}/>
+                  </div>
+                </>
+              )}
+              {step===2 && (
+                <>
+                  <p style={{fontSize:'.85rem',color:'var(--ci)',marginBottom:20}}>Revise e escolha a forma de pagamento.</p>
+                  <div className="checkout-row"><span>Serviço — {modal.role}</span><span>R${modal.preco},00</span></div>
+                  <div className="checkout-row"><span style={{color:'var(--ci)'}}>Taxa da plataforma</span><span style={{color:'var(--ci)'}}>inclusa</span></div>
+                  <div className="checkout-row"><span>Data / Hora</span><span>{form.data} às {form.hora}</span></div>
+                  <div className="checkout-row"><span style={{fontWeight:700}}>Total</span><span style={{color:'var(--g)',fontWeight:900,fontSize:'1.1rem'}}>R${modal.preco},00</span></div>
+                  <div className="divider"/>
+                  <div className="input-wrap">
+                    <label>Forma de pagamento</label>
+                    <select value={form.pagamento} onChange={e=>setForm({...form,pagamento:e.target.value})}>
+                      <option value="pix">💚 Pix (instantâneo)</option>
+                      <option value="credito">💳 Cartão de crédito</option>
+                      <option value="debito">💳 Cartão de débito</option>
+                    </select>
+                  </div>
+                  <div style={{background:'#F0FFF4',borderRadius:12,padding:'12px 14px',fontSize:'.82rem',color:'var(--gd)',display:'flex',gap:8}}>
+                    🔒 Pagamento processado via <strong>Pagar.me</strong>. O valor fica em custódia até você confirmar o serviço.
+                  </div>
+                </>
+              )}
+              {step===3 && (
+                <div className="success-screen">
+                  <div className="success-icon">🎉</div>
+                  <div className="success-title">Pedido confirmado!</div>
+                  <p className="success-sub">Seu pedido foi enviado para <strong>{modal.nm}</strong>. Você receberá uma confirmação em breve. O pagamento será liberado após a conclusão.</p>
+                  <div style={{background:'var(--gs)',borderRadius:12,padding:'14px 16px',marginBottom:20}}>
+                    <div style={{fontFamily:'Nunito',fontWeight:800,marginBottom:4}}>Resumo do pedido</div>
+                    <div style={{fontSize:'.83rem',color:'var(--ci)'}}>📅 {form.data} às {form.hora}</div>
+                    <div style={{fontSize:'.83rem',color:'var(--ci)'}}>💰 R${modal.preco},00 via {form.pagamento.toUpperCase()}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer">
+              {step===1 && <><button className="btn btn-secondary" onClick={()=>setModal(null)}>Cancelar</button><button className="btn btn-primary" onClick={()=>setStep(2)}>Continuar →</button></>}
+              {step===2 && <><button className="btn btn-secondary" onClick={()=>setStep(1)}>Voltar</button><button className="btn btn-primary" onClick={handleContratar}>✅ Confirmar e pagar</button></>}
+              {step===3 && <button className="btn btn-primary" style={{width:'100%',justifyContent:'center'}} onClick={()=>setModal(null)}>Fechar</button>}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── CADASTRO PRO ───
+function Cadastro({onCadastrar,showToast}) {
+  const [step,setStep] = useState(1);
+  const [cats,setCats] = useState([]);
+  const [form,setForm] = useState({nm:'',email:'',tel:'',cnpj:'',cidade:'',desc:'',preco:'',servico:''});
+
+  function toggleCat(id) { setCats(cs=>cs.includes(id)?cs.filter(c=>c!==id):[...cs,id]); }
+
+  function next() {
+    if(step===1){
+      if(!form.nm||!form.email||!form.tel||!form.cnpj){showToast('Preencha todos os campos obrigatórios','error');return;}
+    }
+    if(step===2 && cats.length===0){showToast('Selecione ao menos uma categoria','error');return;}
+    if(step===3){
+      if(!form.desc||!form.preco){showToast('Preencha descrição e preço','error');return;}
+      onCadastrar({...form,cats,ic:CATS.find(c=>c.id===cats[0])?.ic||'🔧',bg:'#F3F4F6',status:'pendente',avaliacao:0,reviews:0,dist:'—'});
+      setStep(4);
+      return;
+    }
+    setStep(s=>s+1);
+  }
+
+  const stepLabels = ['Dados pessoais','Categorias','Serviços','Concluído'];
+  return (
+    <div className="page" style={{background:'#F9FAFB'}}>
+      <div className="register-wrap">
+        <h2 style={{fontFamily:'Nunito',fontWeight:900,fontSize:'1.5rem',marginBottom:6}}>Cadastro de profissional</h2>
+        <p style={{color:'var(--ci)',fontSize:'.88rem',marginBottom:28}}>Preencha seus dados para começar a receber clientes.</p>
+
+        {/* stepper */}
+        <div className="register-steps" style={{marginBottom:32}}>
+          {stepLabels.map((l,i)=>(
+            <React.Fragment key={i}>
+              <div className={`reg-step${step>i+1?' done':step===i+1?' active':''}`}>
+                <div className="reg-step-dot">{step>i+1?'✓':i+1}</div>
+                <div className="reg-step-lbl">{l}</div>
+              </div>
+              {i<stepLabels.length-1 && <div className={`reg-connector${step>i+1?' done':''}`}/>}
+            </React.Fragment>
+          ))}
+        </div>
+
+        <div className="reg-card">
+          {step===1 && (
+            <>
+              <div className="reg-title">Dados pessoais</div>
+              <div className="reg-sub">Informe seus dados para criar seu perfil.</div>
+              <div className="grid-2">
+                <div className="input-wrap"><label>Nome completo *</label><input placeholder="Seu nome" value={form.nm} onChange={e=>setForm({...form,nm:e.target.value})}/></div>
+                <div className="input-wrap"><label>E-mail *</label><input type="email" placeholder="email@exemplo.com" value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></div>
+              </div>
+              <div className="grid-2">
+                <div className="input-wrap"><label>Telefone / WhatsApp *</label><input placeholder="(11) 99999-9999" value={form.tel} onChange={e=>setForm({...form,tel:e.target.value})}/></div>
+                <div className="input-wrap">
+                  <label>CNPJ MEI *</label>
+                  <input placeholder="00.000.000/0001-00" value={form.cnpj} onChange={e=>setForm({...form,cnpj:e.target.value})}/>
+                  <span className="hint">Será verificado junto à Receita Federal</span>
+                </div>
+              </div>
+              <div className="input-wrap"><label>Cidade / Estado *</label><input placeholder="São Paulo, SP" value={form.cidade} onChange={e=>setForm({...form,cidade:e.target.value})}/></div>
+            </>
+          )}
+          {step===2 && (
+            <>
+              <div className="reg-title">Categorias de serviço</div>
+              <div className="reg-sub">Selecione o(s) serviço(s) que você oferece.</div>
+              <div className="cats-check">
+                {CATS.map(c=>(
+                  <div key={c.id} className={`cat-check-item${cats.includes(c.id)?' sel':''}`} onClick={()=>toggleCat(c.id)}>
+                    <span className="ic">{c.ic}</span>
+                    <span className="lb">{c.nm}</span>
+                    {cats.includes(c.id) && <span style={{fontSize:'.65rem',color:'var(--gd)'}}>✓</span>}
+                  </div>
+                ))}
+              </div>
+              <div style={{background:'#F0FFF4',borderRadius:10,padding:'10px 14px',fontSize:'.8rem',color:'var(--gd)'}}>
+                💡 Você pode oferecer múltiplas categorias. Quanto mais, mais pedidos!
+              </div>
+            </>
+          )}
+          {step===3 && (
+            <>
+              <div className="reg-title">Seu serviço</div>
+              <div className="reg-sub">Descreva o que você faz e defina seu preço.</div>
+              <div className="input-wrap">
+                <label>Descrição do serviço *</label>
+                <textarea rows={4} placeholder="Ex: Ofereço serviços de faxina residencial com produtos inclusos. Atendo apartamentos e casas..." value={form.desc} onChange={e=>setForm({...form,desc:e.target.value})} style={{resize:'none'}}/>
+                <span className="hint">Uma boa descrição gera mais confiança e mais contratações.</span>
+              </div>
+              <div className="grid-2">
+                <div className="input-wrap">
+                  <label>Preço base (R$) *</label>
+                  <input type="number" placeholder="150" value={form.preco} onChange={e=>setForm({...form,preco:e.target.value})}/>
+                  <span className="hint">Você recebe 80% deste valor</span>
+                </div>
+                <div className="input-wrap">
+                  <label>Cobrança por</label>
+                  <select value={form.servico} onChange={e=>setForm({...form,servico:e.target.value})}>
+                    <option value="servico">Por serviço</option>
+                    <option value="hora">Por hora</option>
+                    <option value="diaria">Por diária</option>
+                  </select>
+                </div>
+              </div>
+              {form.preco && (
+                <div style={{background:'var(--gs)',borderRadius:12,padding:'14px 16px',fontSize:'.85rem'}}>
+                  <div style={{fontFamily:'Nunito',fontWeight:800,marginBottom:4,color:'var(--gd)'}}>Previsão de ganhos</div>
+                  <div>Para R${form.preco} por serviço, você receberá <strong style={{color:'var(--g)'}}>R${(form.preco*0.8).toFixed(2)}</strong> (80%).</div>
+                </div>
+              )}
+            </>
+          )}
+          {step===4 && (
+            <div className="success-screen">
+              <div className="success-icon">🎉</div>
+              <div className="success-title">Cadastro enviado!</div>
+              <p className="success-sub">Recebemos seu cadastro e ele está em análise. Nossa equipe irá verificar seu CNPJ MEI e aprovar seu perfil em até 24h. Você receberá um e-mail de confirmação.</p>
+              <div style={{background:'var(--gs)',borderRadius:12,padding:'14px 16px',marginBottom:8,textAlign:'left'}}>
+                <div style={{fontFamily:'Nunito',fontWeight:800,marginBottom:6}}>O que acontece agora?</div>
+                {['Verificação do CNPJ MEI na Receita Federal','Análise manual do perfil pelo time AjudaAki','Aprovação e ativação do seu perfil (até 24h)','Você começa a receber pedidos! 🚀'].map((t,i)=>(
+                  <div key={i} style={{fontSize:'.83rem',color:'var(--ci)',marginBottom:5}}>{'0'+(i+1)}. {t}</div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="divider"/>
+          <div style={{display:'flex',justifyContent:'space-between'}}>
+            {step>1 && step<4 ? <button className="btn btn-secondary" onClick={()=>setStep(s=>s-1)}>← Voltar</button> : <div/>}
+            {step<4 && <button className="btn btn-primary" onClick={next}>{step===3?'Enviar cadastro ✓':'Continuar →'}</button>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── ADMIN ───
+function Admin({pros,setPros,showToast}) {
+  const [tab,setTab] = useState('dashboard');
+
+  const pendentes = pros.filter(p=>p.status==='pendente');
+  const aprovados = pros.filter(p=>p.status==='aprovado');
+  const recusados = pros.filter(p=>p.status==='recusado');
+  const totalComissao = INIT_PEDIDOS.reduce((a,p)=>a+p.comissao,0);
+
+  function aprovar(id) { setPros(ps=>ps.map(p=>p.id===id?{...p,status:'aprovado'}:p)); showToast('Profissional aprovado!','success'); }
+  function recusar(id) { setPros(ps=>ps.map(p=>p.id===id?{...p,status:'recusado'}:p)); showToast('Profissional recusado.','error'); }
+
+  const navItems = [
+    {id:'dashboard',ic:'📊',lb:'Dashboard'},
+    {id:'pendentes',ic:'⏳',lb:`Pendentes (${pendentes.length})`},
+    {id:'profissionais',ic:'👷',lb:'Profissionais'},
+    {id:'pedidos',ic:'📋',lb:'Pedidos'},
+    {id:'financeiro',ic:'💰',lb:'Financeiro'},
+  ];
+
+  return (
+    <div className="admin-layout">
+      <div className="admin-sidebar">
+        <div className="admin-logo">Ajuda<span>Aki</span></div>
+        <div className="admin-nav">
+          {navItems.map(n=>(
+            <div key={n.id} className={`anav-item${tab===n.id?' active':''}`} onClick={()=>setTab(n.id)}>
+              <span className="anav-ic">{n.ic}</span>{n.lb}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="admin-main">
+        <div className="admin-topbar">
+          <div className="admin-topbar-title">{navItems.find(n=>n.id===tab)?.lb}</div>
+          <div style={{display:'flex',gap:10,alignItems:'center'}}>
+            {pendentes.length>0 && <span className="badge badge-yellow">⏳ {pendentes.length} aguardando aprovação</span>}
+            <span style={{fontSize:'.82rem',color:'var(--ci)'}}>admin@ajudaaki.com.br</span>
+          </div>
+        </div>
+        <div className="admin-body">
+
+          {tab==='dashboard' && (
+            <>
+              <div className="stats-row">
+                {[
+                  {lb:'Profissionais ativos',val:aprovados.length,sub:`+${pendentes.length} pendentes`,up:true},
+                  {lb:'Pedidos concluídos',val:INIT_PEDIDOS.filter(p=>p.status==='concluido').length,sub:'este mês',up:true},
+                  {lb:'Comissão gerada',val:`R$${totalComissao}`,sub:'nos últimos pedidos',up:true},
+                  {lb:'Avaliação média',val:'4.8★',sub:'plataforma',up:true},
+                ].map((s,i)=>(
+                  <div key={i} className="stat-card">
+                    <div className="stat-card-lbl">{s.lb}</div>
+                    <div className="stat-card-val">{s.val}</div>
+                    <div className={`stat-card-sub${s.up?' up':''}`}>{s.up?'↑ ':''}{s.sub}</div>
+                  </div>
+                ))}
+              </div>
+              {pendentes.length>0 && (
+                <div style={{background:'#FFFBEB',border:'1px solid #FCD34D',borderRadius:var(--br)||16,padding:'16px 20px',marginBottom:20,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                  <div>
+                    <div style={{fontFamily:'Nunito',fontWeight:800,marginBottom:4}}>⏳ {pendentes.length} profissional(is) aguardando aprovação</div>
+                    <div style={{fontSize:'.83rem',color:'var(--ci)'}}>Revise os cadastros na aba "Pendentes".</div>
+                  </div>
+                  <button className="btn btn-sm" style={{background:'#F59E0B',color:'#fff',fontFamily:'Nunito',fontWeight:800,border:'none'}} onClick={()=>setTab('pendentes')}>Revisar agora →</button>
+                </div>
+              )}
+              <div className="table-wrap">
+                <div className="table-header"><div className="table-title">Últimos pedidos</div></div>
+                <table>
+                  <thead><tr><th>Pedido</th><th>Cliente</th><th>Profissional</th><th>Serviço</th><th>Valor</th><th>Comissão</th><th>Status</th></tr></thead>
+                  <tbody>
+                    {INIT_PEDIDOS.map(p=>(
+                      <tr key={p.id}>
+                        <td><code style={{fontSize:'.78rem',background:'var(--cl)',padding:'2px 7px',borderRadius:6}}>{p.id}</code></td>
+                        <td><div className="td-name">{p.cliente}</div></td>
+                        <td><div className="td-email">{p.pro}</div></td>
+                        <td>{p.servico}</td>
+                        <td style={{fontWeight:600}}>R${p.valor}</td>
+                        <td style={{color:'var(--g)',fontWeight:700}}>R${p.comissao}</td>
+                        <td>
+                          <span className={`badge ${p.status==='concluido'?'badge-green':p.status==='em_andamento'?'badge-blue':'badge-yellow'}`}>
+                            {p.status==='concluido'?'✓ Concluído':p.status==='em_andamento'?'🔄 Em andamento':'📅 Agendado'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
+          {tab==='pendentes' && (
+            <div>
+              {pendentes.length===0 ? (
+                <div style={{textAlign:'center',padding:'60px',color:'var(--ci)'}}>
+                  <div style={{fontSize:'3rem',marginBottom:12}}>✅</div>
+                  <div style={{fontFamily:'Nunito',fontWeight:800,fontSize:'1.1rem',color:'var(--pr)',marginBottom:8}}>Tudo em dia!</div>
+                  <p>Nenhum cadastro aguardando aprovação.</p>
+                </div>
+              ) : (
+                <div style={{display:'flex',flexDirection:'column',gap:16}}>
+                  {pendentes.map(p=>(
+                    <div key={p.id} className="card" style={{display:'grid',gridTemplateColumns:'1fr auto',gap:20,alignItems:'start'}}>
+                      <div>
+                        <div style={{display:'flex',gap:12,alignItems:'center',marginBottom:12}}>
+                          <div style={{width:50,height:50,borderRadius:14,background:p.bg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.5rem'}}>{p.ic}</div>
+                          <div>
+                            <div style={{fontFamily:'Nunito',fontWeight:800,fontSize:'1rem'}}>{p.nm}</div>
+                            <div style={{fontSize:'.82rem',color:'var(--ci)'}}>{p.role} · {p.cidade}</div>
+                          </div>
+                        </div>
+                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,marginBottom:12}}>
+                          {[['📧 E-mail',p.email],['📱 Telefone',p.tel||'—'],['🏢 CNPJ',p.cnpj]].map(([l,v])=>(
+                            <div key={l} style={{background:'var(--cl)',borderRadius:10,padding:'10px 12px'}}>
+                              <div style={{fontSize:'.72rem',color:'var(--ci)',marginBottom:2}}>{l}</div>
+                              <div style={{fontSize:'.83rem',fontWeight:600}}>{v}</div>
+                            </div>
+                          ))}
+                        </div>
+                        {p.desc && <p style={{fontSize:'.85rem',color:'var(--ci)',lineHeight:1.6}}>{p.desc}</p>}
+                        {p.preco && <div style={{marginTop:8}}><span className="badge badge-green">R${p.preco}/serviço → Profissional recebe R${(p.preco*0.8).toFixed(0)}</span></div>}
+                      </div>
+                      <div style={{display:'flex',flexDirection:'column',gap:8,minWidth:140}}>
+                        <button className="btn btn-primary btn-sm" onClick={()=>aprovar(p.id)}>✅ Aprovar</button>
+                        <button className="btn btn-danger btn-sm" onClick={()=>recusar(p.id)}>✕ Recusar</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab==='profissionais' && (
+            <>
+              <div className="tabs">
+                {[['todos','Todos ('+pros.length+')'],['aprovado','Aprovados ('+aprovados.length+')'],['pendente','Pendentes ('+pendentes.length+')'],['recusado','Recusados ('+recusados.length+')']].map(([v,l])=>(
+                  <button key={v} className={`tab${tab==='profissionais'?'':''} ${v==='todos'?'active':''}`} style={{}} onClick={()=>{}}>{l}</button>
+                ))}
+              </div>
+              <div className="table-wrap">
+                <div className="table-header"><div className="table-title">Todos os profissionais</div></div>
+                <table>
+                  <thead><tr><th>Nome</th><th>Categoria</th><th>CNPJ</th><th>Cidade</th><th>Preço</th><th>Status</th><th>Ações</th></tr></thead>
+                  <tbody>
+                    {pros.map(p=>(
+                      <tr key={p.id}>
+                        <td>
+                          <div style={{display:'flex',gap:10,alignItems:'center'}}>
+                            <div style={{width:34,height:34,borderRadius:10,background:p.bg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1rem'}}>{p.ic}</div>
+                            <div>
+                              <div className="td-name">{p.nm}</div>
+                              <div className="td-email">{p.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>{p.role}</td>
+                        <td><code style={{fontSize:'.77rem',background:'var(--cl)',padding:'2px 7px',borderRadius:6}}>{p.cnpj}</code></td>
+                        <td style={{color:'var(--ci)',fontSize:'.83rem'}}>{p.cidade}</td>
+                        <td style={{fontWeight:600}}>R${p.preco}</td>
+                        <td>
+                          <span className={`badge ${p.status==='aprovado'?'badge-green':p.status==='pendente'?'badge-yellow':'badge-red'}`}>
+                            {p.status==='aprovado'?'✓ Ativo':p.status==='pendente'?'⏳ Pendente':'✕ Recusado'}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="action-btns">
+                            {p.status==='pendente' && <button className="btn btn-primary btn-sm" onClick={()=>aprovar(p.id)}>Aprovar</button>}
+                            {p.status==='aprovado' && <button className="btn btn-danger btn-sm" onClick={()=>recusar(p.id)}>Suspender</button>}
+                            {p.status==='recusado' && <button className="btn btn-secondary btn-sm" onClick={()=>aprovar(p.id)}>Reativar</button>}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
+          {tab==='pedidos' && (
+            <div className="table-wrap">
+              <div className="table-header"><div className="table-title">Todos os pedidos</div><span className="badge badge-green">Total comissão: R${totalComissao}</span></div>
+              <table>
+                <thead><tr><th>ID</th><th>Cliente</th><th>Profissional</th><th>Serviço</th><th>Valor</th><th>Comissão (20%)</th><th>Data</th><th>Status</th></tr></thead>
+                <tbody>
+                  {INIT_PEDIDOS.map(p=>(
+                    <tr key={p.id}>
+                      <td><code style={{fontSize:'.78rem',background:'var(--cl)',padding:'2px 7px',borderRadius:6}}>{p.id}</code></td>
+                      <td><div className="td-name">{p.cliente}</div></td>
+                      <td><div className="td-email">{p.pro}</div></td>
+                      <td>{p.servico}</td>
+                      <td style={{fontWeight:600}}>R${p.valor}</td>
+                      <td style={{color:'var(--g)',fontWeight:700}}>R${p.comissao}</td>
+                      <td style={{color:'var(--ci)',fontSize:'.82rem'}}>{p.data}</td>
+                      <td>
+                        <span className={`badge ${p.status==='concluido'?'badge-green':p.status==='em_andamento'?'badge-blue':'badge-yellow'}`}>
+                          {p.status==='concluido'?'✓ Concluído':p.status==='em_andamento'?'🔄 Em andamento':'📅 Agendado'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {tab==='financeiro' && (
+            <>
+              <div className="stats-row">
+                {[
+                  {lb:'Volume total processado',val:'R$950',sub:'todos os pedidos'},
+                  {lb:'Comissão AjudaAki (20%)',val:'R$190',sub:'receita da plataforma'},
+                  {lb:'Repasse aos pros (80%)',val:'R$760',sub:'já distribuído'},
+                  {lb:'Pedidos pendentes',val:'R$210',sub:'aguardando conclusão'},
+                ].map((s,i)=>(
+                  <div key={i} className="stat-card">
+                    <div className="stat-card-lbl">{s.lb}</div>
+                    <div className="stat-card-val">{s.val}</div>
+                    <div className="stat-card-sub">{s.sub}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="card">
+                <h3 style={{fontFamily:'Nunito',fontWeight:800,marginBottom:16}}>Extrato de repasses</h3>
+                <table style={{width:'100%'}}>
+                  <thead><tr><th>Profissional</th><th>Pedido</th><th>Valor bruto</th><th>Comissão (20%)</th><th>Repasse (80%)</th><th>Status</th></tr></thead>
+                  <tbody>
+                    {INIT_PEDIDOS.map(p=>(
+                      <tr key={p.id}>
+                        <td><div className="td-name">{p.pro}</div></td>
+                        <td><code style={{fontSize:'.78rem',background:'var(--cl)',padding:'2px 7px',borderRadius:6}}>{p.id}</code></td>
+                        <td style={{fontWeight:600}}>R${p.valor}</td>
+                        <td style={{color:'var(--g)',fontWeight:700}}>R${p.comissao}</td>
+                        <td style={{fontWeight:700,color:'var(--pr)'}}>R${p.valor-p.comissao}</td>
+                        <td>
+                          <span className={`badge ${p.status==='concluido'?'badge-green':'badge-yellow'}`}>
+                            {p.status==='concluido'?'✅ Repassado':'⏳ Pendente'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── APP ROOT ───
+function App() {
+  const [page,setPage] = useState('landing');
+  const [pros,setPros] = useState(INIT_PROS);
+  const [toast,setToast] = useState(null);
+
+  function showToast(msg,type='success') { setToast({msg,type}); }
+
+  function handleCadastrar(data) {
+    const novoPro = {...data, id:Date.now(), nm:data.nm, role:data.cats.map(c=>CATS.find(x=>x.id===c)?.nm).join(' & '), avaliacao:0, reviews:0, dist:'—', status:'pendente', bg:'#F3F4F6', ic: CATS.find(c=>c.id===data.cats[0])?.ic||'🔧'};
+    setPros(ps=>[...ps,novoPro]);
+    showToast('Cadastro enviado para análise!','success');
+  }
+
+  return (
+    <div>
+      {page!=='admin' && <Topbar page={page} setPage={setPage}/>}
+      {page==='landing' && <Landing setPage={setPage}/>}
+      {page==='buscar' && <Buscar pros={pros} showToast={showToast}/>}
+      {page==='cadastro' && <Cadastro onCadastrar={handleCadastrar} showToast={showToast}/>}
+      {page==='admin' && (
+        <div>
+          <div style={{position:'sticky',top:0,zIndex:200,background:'#111827',padding:'12px 24px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <div className="logo" style={{color:'#fff',fontSize:'1.2rem'}}>Ajuda<span>Aki</span> <span style={{fontSize:'.75rem',color:'rgba(255,255,255,.4)',fontFamily:'Inter',fontWeight:400}}>— Painel Admin</span></div>
+            <button className="btn btn-secondary btn-sm" onClick={()=>setPage('landing')}>← Voltar ao site</button>
+          </div>
+          <Admin pros={pros} setPros={setPros} showToast={showToast}/>
+        </div>
+      )}
+      {toast && <Toast msg={toast.msg} type={toast.type} onDone={()=>setToast(null)}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
